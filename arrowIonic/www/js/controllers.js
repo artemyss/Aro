@@ -29,8 +29,34 @@ angular.module('starter.controllers', [])
   //});
 })
 
-.controller('AccountCtrl', function($scope) {
-  $scope.settings = {
-    enableFriends: true
-  };
+.controller('CompassCtrl', function($scope, $state, $cordovaDeviceOrientation) {
+  // see http://ngcordova.com/docs/plugins/deviceOrientation
+
+
+  document.addEventListener("deviceready", function () {
+
+    $scope.heading;
+
+    var options = {
+      frequency: 20,   // if frequency is set, filter is ignored
+      // filter: 3         // degrees of change before refresh
+    };
+
+    $scope.watch = $cordovaDeviceOrientation.watchHeading(options).then(
+      null,
+      function(error) {
+        $scope.heading = err;
+      },
+      function(result) {  // updates constantly (depending on frequency value)
+        $scope.heading = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        //  try result.magneticHeading?
+      });
+
+
+    // watch.clearWatch();
+    // // OR
+    // $cordovaDeviceOrientation.clearWatch(watch)
+    //   .then(function(result) {Success!}, function(err) {error});
+
+    }, false);
 });
