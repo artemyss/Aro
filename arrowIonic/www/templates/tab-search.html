@@ -1,0 +1,9 @@
+<ion-view>
+    <ion-content>
+      <form ng-submit="geocodeAddress()" ng-controller="SearchCtrl">
+        <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" />
+        <pre>list={{list}}</pre>
+      </form>        
+      <div id="map" data-tap-disabled="true"></div>
+    </ion-content>
+</ion-view>

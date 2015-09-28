@@ -1,5 +1,14 @@
 <ion-view>
     <ion-content>
-        <div id="map" data-tap-disabled="true"></div>
+     <form ng-submit="geocodeAddress()">
+        <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" />
+        <pre>list={{list}}</pre>
+      </form> 
+     
+      <!-- <form ng-submit="submit()" ng-controller="MapCtrl">
+        <input type="text" placeholder="type address here" ng-model="text" name="text" />
+        <pre>list={{list}}</pre>
+      </form> -->        
+      <div id="map" data-tap-disabled="true"></div>
     </ion-content>
 </ion-view>
