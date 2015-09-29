@@ -29,6 +29,7 @@
 }
 
 #address {
+  display: inline;
   border: solid;
   border-width: 1px;
   border-color: lightgrey;
@@ -39,5 +40,11 @@
   margin-right: auto;*/
   text-align: center;
   height: 20px;
+}
+
+.currentLocButton {
+  border-radius: 5px;
+  border-color: lightblue;
+  background-color: lightblue;
 }
 
