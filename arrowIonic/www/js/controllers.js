@@ -4,6 +4,7 @@ angular.module('starter.controllers', [])
 
 .controller('MapCtrl', function($rootScope, $scope, $state, $cordovaGeolocation) {
   // do we actually need $state here?
+
   var options = {timeout: 10000, enableHighAccuracy: true};
 
 /*----- wrapping the 'auto center on current location' in a center func 
@@ -121,18 +122,39 @@ angular.module('starter.controllers', [])
   //});
 
 
-.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation) {
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation) {
   // see http://ngcordova.com/docs/plugins/deviceOrientation
-
 
   document.addEventListener("deviceready", function () {
 
-    $scope.heading;
-
-    var options = {
-      frequency: 20,   // if frequency is set, filter is ignored
-      // filter: 3         // degrees of change before refresh
+    var watchOptions = {
+      timeout: 1000,
+      maximumAge: 10000,
+      enableHighAccuracy: false // may cause errors if true
     };
+
+    $scope.here;
+    $scope.there;
+    $scope.bearing;
+
+    $cordovaGeolocation.watchPosition(watchOptions)
+      .then(
+      null,
+      function(err) {
+        console.log(err);
+      },
+      function(position) {
+        $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
+        // $scope.there = turf.point([$rootScope.mousePosition["H"], $rootScope.mousePosition["L"]]);
+        $scope.there = turf.point([44.953561, -93.179080]);   //(test point)
+        $scope.bearing = 'transform: rotate('+ Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90) +'deg)';
+    });
+
+//–––––––––––––––––––––––––––––––––––––COMPASS BELOW
+
+    $scope.heading;
+    $scope.compass;
+    var options = { frequency: 100 };   // how often the watch updates
 
     $scope.watch = $cordovaDeviceOrientation.watchHeading(options).then(
       null,
@@ -140,15 +162,10 @@ angular.module('starter.controllers', [])
         $scope.heading = err;
       },
       function(result) {  // updates constantly (depending on frequency value)
-        $scope.heading = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        $scope.compass = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        $scope.heading = result.trueHeading;
         //  try result.magneticHeading?
       });
-
-
-    // watch.clearWatch();
-    // // OR
-    // $cordovaDeviceOrientation.clearWatch(watch)
-    //   .then(function(result) {Success!}, function(err) {error});
 
     }, false);
 });
