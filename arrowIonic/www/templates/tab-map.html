@@ -1,14 +1,16 @@
 <ion-view>
     <ion-content>
+
      <form ng-submit="geocodeAddress()">
         <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" />
-        <pre>list={{list}}</pre>
-      </form> 
-     
-      <!-- <form ng-submit="submit()" ng-controller="MapCtrl">
-        <input type="text" placeholder="type address here" ng-model="text" name="text" />
-        <pre>list={{list}}</pre>
-      </form> -->        
-      <div id="map" data-tap-disabled="true"></div>
+        <!-- <pre>list={{text}}</pre> linked to local storage of address in controller -->
+      </form>       
+      <div class="mapview">
+        <input class="mapview" type="submit" value="current location" ng-click="center()"/>
+        <input class="mapview" type="submit" value="destination" ng-click="geocodeAddress()"/>
+      </div>
+
+     <div id="map" data-tap-disabled="true"></div>
+
     </ion-content>
 </ion-view>
