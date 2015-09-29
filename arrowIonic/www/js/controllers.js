@@ -6,6 +6,11 @@ angular.module('starter.controllers', [])
   // do we actually need $state here?
   var options = {timeout: 10000, enableHighAccuracy: true};
 
+/*----- wrapping the 'auto center on current location' in a center func 
+    that it is invoked each time the user enters map view allows for the 
+    geocodeAddress function to place a marker & relocate your view. Though we 
+    might want an option that allows the viewer to choose current/destination view -----*/
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
     var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -17,6 +22,8 @@ angular.module('starter.controllers', [])
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+
     var contentString = '<div id="content">'+
 
           '<div id="bodyContent">'+
@@ -43,35 +50,35 @@ angular.module('starter.controllers', [])
       });
 
     };
-  $scope.geocoder = new google.maps.Geocoder();
-  
-  $scope.geocodeAddress = function(geocoder, map) {
-    var address = document.getElementById('address').value;
-    $scope.geocoder.geocode({'address': address}, function(results, status) {
-      if (status === google.maps.GeocoderStatus.OK) {
-        $scope.map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-          map: $scope.map,
-          animation: google.maps.Animation.DROP,
-          position: results[0].geometry.location
-        });
-        marker.addListener('click', function() {
-        infowindow.open($scope.map, marker);
-        });
-        // console.log(results[0].geometry.location);
-        var coordsResult = results[0].geometry.location;
-        console.log(coordsResult);
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });
-  };
 
+  $scope.geocoder = new google.maps.Geocoder();
+
+/*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
+    $scope.geocodeAddress = function(geocoder, map) {
+      var address = document.getElementById('address').value;
+      $scope.geocoder.geocode({'address': address}, function(results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          $scope.map.setCenter(results[0].geometry.location);
+          var marker = new google.maps.Marker({
+            map: $scope.map,
+            animation: google.maps.Animation.DROP,
+            position: results[0].geometry.location
+          });
+          marker.addListener('click', function() {
+          infowindow.open($scope.map, marker);
+          });
+          // console.log(results[0].geometry.location);
+          var coordsResult = results[0].geometry.location;
+          console.log(coordsResult);
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    };
   }, function(error){
     console.log("Could not get location");
   });
-
-
+})
 /*----------when user enters map tab view this loads current location view-----*/
   // $scope.$on('$ionicView.enter', function(){
   //   $scope.center();
@@ -91,32 +98,6 @@ angular.module('starter.controllers', [])
 
 
 /*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
-  // $scope.geocoder = new google.maps.Geocoder();
-  
-  // $scope.geocodeAddress = function(geocoder, map) {
-  //   var address = document.getElementById('address').value;
-  //   $scope.geocoder.geocode({'address': address}, function(results, status) {
-  //     if (status === google.maps.GeocoderStatus.OK) {
-  //       $scope.map.setCenter(results[0].geometry.location);
-  //       var marker = new google.maps.Marker({
-  //         map: $scope.map,
-  //         animation: google.maps.Animation.DROP,
-  //         position: results[0].geometry.location
-  //       });
-  //       marker.addListener('click', function() {
-  //       infowindow.open($scope.map, marker);
-  //       });
-  //       // console.log(results[0].geometry.location);
-  //       var coordsResult = results[0].geometry.location;
-  //       console.log(coordsResult);
-  //     } else {
-  //       alert('Geocode was not successful for the following reason: ' + status);
-  //     }
-  //   });
-  // };
-
-})
-
 
 
   // With the new view caching in Ionic, Controllers are only called
@@ -159,6 +140,7 @@ angular.module('starter.controllers', [])
 
     }, false);
 });
+
 
   
 /*--------------------------google places autocomplete attempt ---------------------------/

@@ -8,6 +8,7 @@
     height: 100%;
 }
 
+
 #circle {
   margin: auto;
   margin-top: 100px;
@@ -27,19 +28,11 @@
   margin: auto;
 }
 
-.mapview input {
-  border-radius: 20px;
-  border: none;
-  margin: 10px auto 10px auto;
-  background-color: rgba(63, 191, 63, 0.42);
-}
-.mapview {
-  margin-left: auto;
-}
 #address {
   border: solid;
   border-width: 1px;
   border-color: lightgrey;
+
   border-radius: 5px;
 /*centers:  margin-top: 10px;
   margin-left: auto; 
@@ -47,3 +40,4 @@
   text-align: center;
   height: 20px;
 }
+
