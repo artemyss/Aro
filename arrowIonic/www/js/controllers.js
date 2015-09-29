@@ -16,8 +16,8 @@ angular.module('starter.controllers', [])
     var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
     $scope.currentMarker = function(){
-      $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
       $rootScope.currentPosition = latLng;
+      $scope.map.setCenter($rootScope.currentPosition);
       var marker = new google.maps.Marker({
         map: $scope.map,
         animation: google.maps.Animation.DROP,
