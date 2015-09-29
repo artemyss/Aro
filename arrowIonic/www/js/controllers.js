@@ -18,7 +18,7 @@ angular.module('starter.controllers', [])
     var contentString = '<div id="content">'+
 
           '<div id="bodyContent">'+
-          '<a href="#/tab/account"> CLICK HERE </a>'+
+          '<a href="#/tab/compass"> CLICK HERE </a>'+
           '</div>'+
           '</div>';
 
