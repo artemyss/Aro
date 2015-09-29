@@ -15,6 +15,19 @@ angular.module('starter.controllers', [])
 
     var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
+    $scope.currentMarker = function(){
+      $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      $rootScope.currentPosition = latLng;
+      var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: $rootScope.currentPosition
+      });
+      marker.addListener('click', function() {
+        infowindow.open($scope.map, marker);
+      });
+    };
+
     var mapOptions = {
       center: latLng,
       zoom: 15,
@@ -22,8 +35,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-
+    
     var contentString = '<div id="content">'+
 
           '<div id="bodyContent">'+

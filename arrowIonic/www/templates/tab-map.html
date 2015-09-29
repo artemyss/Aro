@@ -1,16 +1,16 @@
-<ion-view>
+<ion-view view-title="Map">
     <ion-content>
-
-     <form ng-submit="geocodeAddress()">
-        <input id="address" type="text" placeholder="type address here" ng-model="text" name="text"/>
-        <!-- <pre>list={{text}}</pre> linked to local storage of address in controller -->
-      </form>       
-      <!-- not working if there is no seperated function for centering<div class="mapview">
-        <input class="mapview" type="submit" value="current location" ng-click="center()"/>
-        <input class="mapview" type="submit" value="destination" ng-click="geocodeAddress()"/>
-      </div> -->
-
-     <div id="map" data-tap-disabled="true" on-hold="onHold()"></div>
+      <!--search field -->
+      <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
+     
+      <!-- drop marker on current location button -->
+      <input class="currentLocButton" type="submit" value="pin current location" on-tap="currentMarker()"/>
+         
+      <!-- map -->
+      <div id="map" data-tap-disabled="true" on-hold="onHold()"></div>
 
     </ion-content>
 </ion-view>
+
+  <!-- using ng-keyup="$event.keyCode == 13 fires the func after '&&' when 'enter' is pressed - this is used unstead of ng-submit so that the button and input field can be inline without a form elemant around them which cause one to trigger the other - check compatible on phone--> 
+  <!-- <pre>list={{text}}</pre> linked to local storage of address in controller -->
