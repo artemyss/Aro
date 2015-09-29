@@ -51,6 +51,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     })
 
+  .state('tab.compass', {
+    url: '/compass',
+    views: {
+      'tab-compass': {
+        templateUrl: 'templates/tab-compass.html',
+        controller: 'CompassCtrl'
+      }
+    }
+  });
+
+
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/tab/map');
 

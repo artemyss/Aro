@@ -1,36 +1,88 @@
 angular.module('starter.controllers', [])
 
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
+
+.controller('MapCtrl', function($rootScope, $scope, $state, $cordovaGeolocation) {
+  // do we actually need $state here?
+  var options = {timeout: 10000, enableHighAccuracy: true};
+
 /*----- wrapping the 'auto center on current location' in a center func 
     that it is invoked each time the user enters map view allows for the 
     geocodeAddress function to place a marker & relocate your view. Though we 
     might want an option that allows the viewer to choose current/destination view -----*/
-  $scope.center = function() {
 
-    var options = {timeout: 10000, enableHighAccuracy: true};
+  $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
-    $cordovaGeolocation.getCurrentPosition(options).then(function(position){
+    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
-      var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      console.log(latLng);
-      var mapOptions = {
-        center: latLng,
-        zoom: 15,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-      };
+    var mapOptions = {
+      center: latLng,
+      zoom: 15,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
 
-      $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-    }, function(error){
-      console.log("Could not get location");
+
+    var contentString = '<div id="content">'+
+
+          '<div id="bodyContent">'+
+          '<a href="#/tab/compass"> CLICK HERE </a>'+
+          '</div>'+
+          '</div>';
+
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+
+    google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
+      $rootScope.mousePosition = e.latLng;
     });
-  };
 
-/*----------when user enters map tab view this loads current location view-----*/
-  $scope.$on('$ionicView.enter', function(){
-    $scope.center();
+    $scope.onHold = function() {
+      var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: $rootScope.mousePosition
+      });
+      marker.addListener('click', function() {
+        infowindow.open($scope.map, marker);
+      });
+
+    };
+
+  $scope.geocoder = new google.maps.Geocoder();
+
+/*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
+    $scope.geocodeAddress = function(geocoder, map) {
+      var address = document.getElementById('address').value;
+      $scope.geocoder.geocode({'address': address}, function(results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          $scope.map.setCenter(results[0].geometry.location);
+          var marker = new google.maps.Marker({
+            map: $scope.map,
+            animation: google.maps.Animation.DROP,
+            position: results[0].geometry.location
+          });
+          marker.addListener('click', function() {
+          infowindow.open($scope.map, marker);
+          });
+          // console.log(results[0].geometry.location);
+          var coordsResult = results[0].geometry.location;
+          console.log(coordsResult);
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    };
+  }, function(error){
+    console.log("Could not get location");
   });
+})
+/*----------when user enters map tab view this loads current location view-----*/
+  // $scope.$on('$ionicView.enter', function(){
+  //   $scope.center();
+  // });
 
 
 /*optional array to store addresses if needed
@@ -46,26 +98,6 @@ angular.module('starter.controllers', [])
 
 
 /*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
-  $scope.geocoder = new google.maps.Geocoder();
-  
-  $scope.geocodeAddress = function(geocoder, map) {
-    var address = document.getElementById('address').value;
-    $scope.geocoder.geocode({'address': address}, function(results, status) {
-      if (status === google.maps.GeocoderStatus.OK) {
-        $scope.map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-          map: $scope.map,
-          position: results[0].geometry.location
-        });
-        // console.log(results[0].geometry.location);
-        var coordsResult = results[0].geometry.location;
-        console.log(coordsResult);
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });
-  };
-})
 
 
   // With the new view caching in Ionic, Controllers are only called
@@ -75,6 +107,40 @@ angular.module('starter.controllers', [])
   //
   //$scope.$on('$ionicView.enter', function(e) {
   //});
+
+
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation) {
+  // see http://ngcordova.com/docs/plugins/deviceOrientation
+
+
+  document.addEventListener("deviceready", function () {
+
+    $scope.heading;
+
+    var options = {
+      frequency: 20,   // if frequency is set, filter is ignored
+      // filter: 3         // degrees of change before refresh
+    };
+
+    $scope.watch = $cordovaDeviceOrientation.watchHeading(options).then(
+      null,
+      function(error) {
+        $scope.heading = err;
+      },
+      function(result) {  // updates constantly (depending on frequency value)
+        $scope.heading = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        //  try result.magneticHeading?
+      });
+
+
+    // watch.clearWatch();
+    // // OR
+    // $cordovaDeviceOrientation.clearWatch(watch)
+    //   .then(function(result) {Success!}, function(err) {error});
+
+    }, false);
+});
+
 
   
 /*--------------------------google places autocomplete attempt ---------------------------/

@@ -2,15 +2,15 @@
     <ion-content>
 
      <form ng-submit="geocodeAddress()">
-        <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" />
+        <input id="address" type="text" placeholder="type address here" ng-model="text" name="text"/>
         <!-- <pre>list={{text}}</pre> linked to local storage of address in controller -->
       </form>       
-      <div class="mapview">
+      <!-- not working if there is no seperated function for centering<div class="mapview">
         <input class="mapview" type="submit" value="current location" ng-click="center()"/>
         <input class="mapview" type="submit" value="destination" ng-click="geocodeAddress()"/>
-      </div>
+      </div> -->
 
-     <div id="map" data-tap-disabled="true"></div>
+     <div id="map" data-tap-disabled="true" on-hold="onHold()"></div>
 
     </ion-content>
 </ion-view>
