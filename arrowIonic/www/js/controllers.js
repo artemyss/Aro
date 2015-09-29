@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
+.controller('MapCtrl', function($rootScope, $scope, $state, $cordovaGeolocation) {
   // do we actually need $state here?
   var options = {timeout: 10000, enableHighAccuracy: true};
 
@@ -15,6 +15,33 @@ angular.module('starter.controllers', [])
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    var contentString = '<div id="content">'+
+
+          '<div id="bodyContent">'+
+          '<a href="#/tab/account"> CLICK HERE </a>'+
+          '</div>'+
+          '</div>';
+
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+
+    google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
+      $rootScope.mousePosition = e.latLng;
+    });
+
+    $scope.onHold = function() {
+      var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: $rootScope.mousePosition
+      });
+      marker.addListener('click', function() {
+        infowindow.open($scope.map, marker);
+      });
+
+    };
+
 
   }, function(error){
     console.log("Could not get location");
@@ -29,7 +56,7 @@ angular.module('starter.controllers', [])
   //});
 })
 
-.controller('CompassCtrl', function($scope, $state, $cordovaDeviceOrientation) {
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation) {
   // see http://ngcordova.com/docs/plugins/deviceOrientation
 
 
