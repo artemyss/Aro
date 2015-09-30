@@ -1,9 +1,11 @@
 <ion-view view-title="Compass">
   <ion-content>
-    <div>{{there}}</div>
+    <div>{{mousePosition}}</div>
+    <div>here: {{here}}</div>
+    <div>there: {{there}}</div>
     <div>bearing: {{bearing}}</div>
     <div>heading: {{heading}}</div>
-    <div id="circle" style={{bearing}}>
+    <div id="circle" style={{rotation}}>
       <div id="arrow"></div>
     </div>
   </ion-content>

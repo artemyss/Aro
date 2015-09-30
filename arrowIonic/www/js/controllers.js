@@ -7,9 +7,9 @@ angular.module('starter.controllers', [])
 
   var options = {timeout: 10000, enableHighAccuracy: true};
 
-/*----- wrapping the 'auto center on current location' in a center func 
-    that it is invoked each time the user enters map view allows for the 
-    geocodeAddress function to place a marker & relocate your view. Though we 
+/*----- wrapping the 'auto center on current location' in a center func
+    that it is invoked each time the user enters map view allows for the
+    geocodeAddress function to place a marker & relocate your view. Though we
     might want an option that allows the viewer to choose current/destination view -----*/
 
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
@@ -36,7 +36,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    
+
     var contentString = '<div id="content">'+
 
           '<div id="bodyContent">'+
@@ -127,15 +127,16 @@ angular.module('starter.controllers', [])
 
   document.addEventListener("deviceready", function () {
 
-    var watchOptions = {
-      timeout: 1000,
-      maximumAge: 10000,
-      enableHighAccuracy: false // may cause errors if true
-    };
-
     $scope.here;
     $scope.there;
     $scope.bearing;
+    $scope.rotation;
+
+    var watchOptions = {
+      timeout: 3000,
+      maximumAge: 10000,
+      enableHighAccuracy: false // may cause errors if true
+    };
 
     $cordovaGeolocation.watchPosition(watchOptions)
       .then(
@@ -145,12 +146,12 @@ angular.module('starter.controllers', [])
       },
       function(position) {
         $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
-        // $scope.there = turf.point([$rootScope.mousePosition["H"], $rootScope.mousePosition["L"]]);
-        $scope.there = turf.point([44.953561, -93.179080]);   //(test point)
-        $scope.bearing = 'transform: rotate('+ Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90) +'deg)';
+        $scope.there = turf.point([$rootScope.mousePosition["H"], $rootScope.mousePosition["L"]]);
+        $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
+        $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
+
     });
 
-//–––––––––––––––––––––––––––––––––––––COMPASS BELOW
 
     $scope.heading;
     $scope.compass;
@@ -171,9 +172,9 @@ angular.module('starter.controllers', [])
 });
 
 
-  
+
 /*--------------------------google places autocomplete attempt ---------------------------/
-      
+
       $scope.map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: -33.8688, lng: 151.2195},
         zoom: 13,
@@ -199,7 +200,7 @@ angular.module('starter.controllers', [])
       $scope.searchBox.addListener('click', function() {
         $scope.places = $scope.searchBox.getPlaces();
 
-     
+
 
         if ($scope.places.length == 0) {
           return;
