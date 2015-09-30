@@ -4,11 +4,12 @@ angular.module('starter.controllers', [])
 
 .controller('MapCtrl', function($rootScope, $scope, $state, $cordovaGeolocation) {
   // do we actually need $state here?
+
   var options = {timeout: 10000, enableHighAccuracy: true};
 
-/*----- wrapping the 'auto center on current location' in a center func 
-    that it is invoked each time the user enters map view allows for the 
-    geocodeAddress function to place a marker & relocate your view. Though we 
+/*----- wrapping the 'auto center on current location' in a center func
+    that it is invoked each time the user enters map view allows for the
+    geocodeAddress function to place a marker & relocate your view. Though we
     might want an option that allows the viewer to choose current/destination view -----*/
 
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
@@ -35,7 +36,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    
+
     var contentString = '<div id="content">'+
 
           '<div id="bodyContent">'+
@@ -121,18 +122,40 @@ angular.module('starter.controllers', [])
   //});
 
 
-.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation) {
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation) {
   // see http://ngcordova.com/docs/plugins/deviceOrientation
-
 
   document.addEventListener("deviceready", function () {
 
-    $scope.heading;
+    $scope.here;
+    $scope.there;
+    $scope.bearing;
+    $scope.rotation;
 
-    var options = {
-      frequency: 20,   // if frequency is set, filter is ignored
-      // filter: 3         // degrees of change before refresh
+    var watchOptions = {
+      timeout: 3000,
+      maximumAge: 10000,
+      enableHighAccuracy: false // may cause errors if true
     };
+
+    $cordovaGeolocation.watchPosition(watchOptions)
+      .then(
+      null,
+      function(err) {
+        console.log(err);
+      },
+      function(position) {
+        $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
+        $scope.there = turf.point([$rootScope.mousePosition["H"], $rootScope.mousePosition["L"]]);
+        $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
+        $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
+
+    });
+
+
+    $scope.heading;
+    $scope.compass;
+    var options = { frequency: 100 };   // how often the watch updates
 
     $scope.watch = $cordovaDeviceOrientation.watchHeading(options).then(
       null,
@@ -140,23 +163,18 @@ angular.module('starter.controllers', [])
         $scope.heading = err;
       },
       function(result) {  // updates constantly (depending on frequency value)
-        $scope.heading = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        $scope.compass = 'transform: rotate(-'+ result.trueHeading +'deg)';
+        $scope.heading = result.trueHeading;
         //  try result.magneticHeading?
       });
-
-
-    // watch.clearWatch();
-    // // OR
-    // $cordovaDeviceOrientation.clearWatch(watch)
-    //   .then(function(result) {Success!}, function(err) {error});
 
     }, false);
 });
 
 
-  
+
 /*--------------------------google places autocomplete attempt ---------------------------/
-      
+
       $scope.map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: -33.8688, lng: 151.2195},
         zoom: 13,
@@ -182,7 +200,7 @@ angular.module('starter.controllers', [])
       $scope.searchBox.addListener('click', function() {
         $scope.places = $scope.searchBox.getPlaces();
 
-     
+
 
         if ($scope.places.length == 0) {
           return;
