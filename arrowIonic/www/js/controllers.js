@@ -1,96 +1,102 @@
 angular.module('starter.controllers', [])
 
+.controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation) {
 
+  // Get geolocation of user's current position and initialize map
+  $cordovaGeolocation.getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
+    .then(function(currentPosition) {
 
-.controller('MapCtrl', function($rootScope, $scope, $state, $cordovaGeolocation) {
-  // do we actually need $state here?
+      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+      $scope.geocoder = new google.maps.Geocoder();
+      initializeMap($rootScope.currentPosition);
 
-  var options = {timeout: 10000, enableHighAccuracy: true};
+    }, function(error) {
+      console.log("Could not get current location");
+    }); // end cordovaGeolocation
 
-/*----- wrapping the 'auto center on current location' in a center func
-    that it is invoked each time the user enters map view allows for the
-    geocodeAddress function to place a marker & relocate your view. Though we
-    might want an option that allows the viewer to choose current/destination view -----*/
-
-  $cordovaGeolocation.getCurrentPosition(options).then(function(position){
-
-    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-    $scope.currentMarker = function(){
-      $rootScope.currentPosition = latLng;
-      $scope.map.setCenter($rootScope.currentPosition);
-      var marker = new google.maps.Marker({
-        map: $scope.map,
-        animation: google.maps.Animation.DROP,
-        position: $rootScope.currentPosition
-      });
-      marker.addListener('click', function() {
-        infowindow.open($scope.map, marker);
-      });
-    };
+  var initializeMap = function(currentPosition) {
 
     var mapOptions = {
-      center: latLng,
+      center: currentPosition,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-    var contentString = '<div id="content">'+
-
-          '<div id="bodyContent">'+
-          '<a href="#/tab/compass"> CLICK HERE </a>'+
-          '</div>'+
-          '</div>';
-
-      var infowindow = new google.maps.InfoWindow({
-        content: contentString
-      });
-
     google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
-      $rootScope.mousePosition = e.latLng;
+      $scope.mousePosition = e.latLng;
+      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+      }
+      infowindow.close();
     });
 
-    $scope.onHold = function() {
-      var marker = new google.maps.Marker({
-        map: $scope.map,
-        animation: google.maps.Animation.DROP,
-        position: $rootScope.mousePosition
-      });
-      marker.addListener('click', function() {
-        infowindow.open($scope.map, marker);
-      });
+  }; // end initializeMap
 
-    };
+  var infowindow = new google.maps.InfoWindow({ content: '<div id="content"><div id="bodyContent"><a href="#/tab/compass"> CLICK HERE </a></div></div>' });
 
-  $scope.geocoder = new google.maps.Geocoder();
+  var markers = [];
+  var markerID = 0;
+  $scope.createMarker = function(position) {
 
-/*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
-    $scope.geocodeAddress = function(geocoder, map) {
-      var address = document.getElementById('address').value;
-      $scope.geocoder.geocode({'address': address}, function(results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
-          $scope.map.setCenter(results[0].geometry.location);
-          var marker = new google.maps.Marker({
-            map: $scope.map,
-            animation: google.maps.Animation.DROP,
-            position: results[0].geometry.location
-          });
-          marker.addListener('click', function() {
-          infowindow.open($scope.map, marker);
-          });
-          // console.log(results[0].geometry.location);
-          var coordsResult = results[0].geometry.location;
-          console.log(coordsResult);
-        } else {
-          alert('Geocode was not successful for the following reason: ' + status);
-        }
-      });
-    };
-  }, function(error){
-    console.log("Could not get location");
-  });
+    // Save the location of where the marker is created
+    // to access from the compass
+    $rootScope.markerPosition = position;
+
+    var marker = new google.maps.Marker({
+      map: $scope.map,
+      animation: google.maps.Animation.DROP,
+      draggable: true,
+      position: position
+    });
+
+    marker.id = markerID;
+    markerID++;
+    markers.push(marker);
+
+    marker.addListener('click', function() {
+      $scope.markerID = this.id;
+      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+      } else {
+        document.getElementById('deleteMarkerButton').style.display = 'block';
+      }
+      infowindow.open($scope.map, marker);
+    });
+
+    if (position === $rootScope.currentPosition) $scope.map.setCenter(position);
+
+  }; // end createMarker
+
+  $scope.deleteMarker = function(markerID) {
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].id === markerID) {
+        markers[i].setMap(null);
+        markers.splice(i, 1);
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+        return;
+      }
+    }
+  }; // end deleteMarker
+
+  // geocodes a human readable address & stores long/lat in var coordsResult
+  $scope.geocodeAddress = function(geocoder, map) {
+
+    var address = document.getElementById('address').value;
+
+    $scope.geocoder.geocode({'address': address}, function(results, status) {
+      if (status === google.maps.GeocoderStatus.OK) {
+        $scope.map.setCenter(results[0].geometry.location);
+        var coordsResult = results[0].geometry.location;
+        console.log(coordsResult);
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+
+  }; // end geocodeAddress
+
 })
 /*----------when user enters map tab view this loads current location view-----*/
   // $scope.$on('$ionicView.enter', function(){
