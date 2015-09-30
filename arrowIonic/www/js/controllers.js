@@ -98,11 +98,6 @@ angular.module('starter.controllers', [])
   }; // end geocodeAddress
 
 })
-/*----------when user enters map tab view this loads current location view-----*/
-  // $scope.$on('$ionicView.enter', function(){
-  //   $scope.center();
-  // });
-
 
 /*optional array to store addresses if needed
   $scope.list = [];
@@ -114,10 +109,6 @@ angular.module('starter.controllers', [])
     }
   };
 */
-
-
-/*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
-
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
