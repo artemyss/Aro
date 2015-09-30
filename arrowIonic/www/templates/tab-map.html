@@ -2,15 +2,15 @@
     <ion-content>
       <!--search field -->
       <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
-     
+
       <!-- drop marker on current location button -->
-      <input class="currentLocButton" type="submit" value="pin current location" on-tap="currentMarker()"/>
-         
+      <input class="currentLocButton" type="submit" value="pin current location" on-tap="createMarker(currentPosition)"/>
+
       <!-- map -->
-      <div id="map" data-tap-disabled="true" on-hold="onHold()"></div>
+      <div id="map" data-tap-disabled="true" on-hold="createMarker(mousePosition)"></div>
 
     </ion-content>
 </ion-view>
 
-  <!-- using ng-keyup="$event.keyCode == 13 fires the func after '&&' when 'enter' is pressed - this is used unstead of ng-submit so that the button and input field can be inline without a form elemant around them which cause one to trigger the other - check compatible on phone--> 
+  <!-- using ng-keyup="$event.keyCode == 13 fires the func after '&&' when 'enter' is pressed - this is used unstead of ng-submit so that the button and input field can be inline without a form elemant around them which cause one to trigger the other - check compatible on phone-->
   <!-- <pre>list={{text}}</pre> linked to local storage of address in controller -->
