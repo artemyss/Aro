@@ -26,12 +26,18 @@ angular.module('starter.controllers', [])
 
     google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
       $scope.mousePosition = e.latLng;
+      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+      }
+      infowindow.close();
     });
 
   }; // end initializeMap
 
   var infowindow = new google.maps.InfoWindow({ content: '<div id="content"><div id="bodyContent"><a href="#/tab/compass"> CLICK HERE </a></div></div>' });
 
+  var markers = [];
+  var markerID = 0;
   $scope.createMarker = function(position) {
 
     // Save the location of where the marker is created
@@ -41,10 +47,21 @@ angular.module('starter.controllers', [])
     var marker = new google.maps.Marker({
       map: $scope.map,
       animation: google.maps.Animation.DROP,
+      draggable: true,
       position: position
     });
 
+    marker.id = markerID;
+    markerID++;
+    markers.push(marker);
+
     marker.addListener('click', function() {
+      $scope.markerID = this.id;
+      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+      } else {
+        document.getElementById('deleteMarkerButton').style.display = 'block';
+      }
       infowindow.open($scope.map, marker);
     });
 
@@ -52,8 +69,15 @@ angular.module('starter.controllers', [])
 
   }; // end createMarker
 
-  $scope.deleteMarker = function() {
-
+  $scope.deleteMarker = function(markerID) {
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].id === markerID) {
+        markers[i].setMap(null);
+        markers.splice(i, 1);
+        document.getElementById('deleteMarkerButton').style.display = 'none';
+        return;
+      }
+    }
   }; // end deleteMarker
 
   // geocodes a human readable address & stores long/lat in var coordsResult
