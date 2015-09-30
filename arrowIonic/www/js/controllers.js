@@ -132,7 +132,6 @@ angular.module('starter.controllers', [])
   // see http://ngcordova.com/docs/plugins/deviceOrientation
 
   document.addEventListener("deviceready", function () {
-
     $scope.here;
     $scope.there;
     $scope.bearing;
@@ -152,10 +151,9 @@ angular.module('starter.controllers', [])
       },
       function(position) {
         $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
-        $scope.there = turf.point([$rootScope.mousePosition["H"], $rootScope.mousePosition["L"]]);
+        $scope.there = turf.point([$rootScope.markerPosition["H"], $rootScope.markerPosition["L"]]);
         $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
         $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
-
     });
 
 
@@ -168,7 +166,7 @@ angular.module('starter.controllers', [])
       function(error) {
         $scope.heading = err;
       },
-      function(result) {  // updates constantly (depending on frequency value)
+      function(result) {
         $scope.compass = 'transform: rotate(-'+ result.trueHeading +'deg)';
         $scope.heading = result.trueHeading;
         //  try result.magneticHeading?
