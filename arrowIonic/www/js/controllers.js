@@ -130,6 +130,7 @@ angular.module('starter.controllers', [])
     $scope.there;
     $scope.bearing;
     $scope.rotation;
+    $scope.distance;
 
     var watchOptions = {
       timeout: 3000,
@@ -148,6 +149,7 @@ angular.module('starter.controllers', [])
         $scope.there = turf.point([$rootScope.markerPosition["H"], $rootScope.markerPosition["L"]]);
         $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
         $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
+        $scope.distance = Number(turf.distance($scope.here, $scope.there, 'miles')).toFixed(2);
     });
 
 
