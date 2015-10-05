@@ -19,7 +19,8 @@ angular.module('starter.controllers', [])
     var mapOptions = {
       center: currentPosition,
       zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true,
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
@@ -27,14 +28,20 @@ angular.module('starter.controllers', [])
     google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
       $scope.mousePosition = e.latLng;
       if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('setArrowButton').style.display = 'none';
         document.getElementById('deleteMarkerButton').style.display = 'none';
+        document.getElementById('currentLocButton').style.display = 'block';
       }
       infowindow.close();
     });
 
   }; // end initializeMap
 
-  var infowindow = new google.maps.InfoWindow({ content: '<div id="content"><div id="bodyContent"><a href="#/tab/compass"> CLICK HERE </a></div></div>' });
+  var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
+
+  $scope.currentLocation = function() {
+    $scope.map.setCenter($rootScope.currentPosition);
+  };
 
   var markers = [];
   var markerID = 0;
@@ -58,9 +65,13 @@ angular.module('starter.controllers', [])
     marker.addListener('click', function() {
       $scope.markerID = this.id;
       if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+        document.getElementById('setArrowButton').style.display = 'none';
         document.getElementById('deleteMarkerButton').style.display = 'none';
+        document.getElementById('currentLocButton').style.display = 'block';
       } else {
+        document.getElementById('setArrowButton').style.display = 'block';
         document.getElementById('deleteMarkerButton').style.display = 'block';
+        document.getElementById('currentLocButton').style.display = 'none';
       }
       infowindow.open($scope.map, marker);
     });
@@ -75,6 +86,8 @@ angular.module('starter.controllers', [])
         markers[i].setMap(null);
         markers.splice(i, 1);
         document.getElementById('deleteMarkerButton').style.display = 'none';
+        document.getElementById('setArrowButton').style.display = 'none';
+        document.getElementById('currentLocButton').style.display = 'block';
         return;
       }
     }
