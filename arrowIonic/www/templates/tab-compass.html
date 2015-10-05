@@ -11,23 +11,3 @@
     </div>
   </ion-pane>
 </ion-view>
-
-
-<!-- notes to self : there are two ways of disabling scroll i see so far: 
-	1. change ion-content to ion-pane (seems like the less hacky way) but if you want to scroll sometimes or in some places, etc you need to use way 2
-	2. create an invisible input/button (can't just be a div) and use ng-click directive (in browser view this doesn't ever have to be clicked in order to take effect) 
-
-		html: 
-			<ion-content delegate-handle="mainScroll">
-	 		 <input ng-click="stopScroll()"></input>
-
-	 	controller js: (obvi - in controller that controls the view you want to stop scroll in)
-		 	$scope.stopScroll = function() {
-	    	$ionicScrollDelegate.$getByHandle('mainScroll').getScrollView().options.scrollingY = false; 
-	  	}
-
-	  Option 2 feels incredibly hacky but it doesn't freeze scroll unless there is an element on the 'page' view you want to freeze ~ ionic bug perhaps 
-	  I am going with ion-pane because that is perfectly fine in this case -->
-
-
-
