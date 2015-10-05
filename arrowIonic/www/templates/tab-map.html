@@ -1,13 +1,19 @@
 <ion-view view-title="Map">
     <ion-content>
-      <!--search field -->
-      <input id="address" type="text" placeholder="type address here" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
+      <div id="search">
+        <!--search field -->
+        <input id="address" type="text" placeholder="Go to location" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
+      </div>
 
-      <!-- drop marker on current location button -->
-      <input class="currentLocButton" type="submit" value="pin current location" on-tap="createMarker(currentPosition)"/>
+      <div id="button">
+        <!-- drop marker on current location button -->
+        <input id="currentLocButton" type="submit" value="Current Location" on-tap="currentLocation()"/>
 
-      <!-- delete marker that has been clicked -->
-      <input id="deleteMarkerButton" style="display: none"type="submit" value="delete selected marker" on-tap="deleteMarker(markerID)"/>
+        <!-- delete marker that has been clicked -->
+        <a id="setArrowButton" style="display: none" href="#/tab/compass">Guide me here</a>
+        <input id="deleteMarkerButton" style="display: none" type="submit" value="Delete marker" on-tap="deleteMarker(markerID)"/>
+      </div>
+
 
       <!-- map -->
       <div id="map" data-tap-disabled="true" on-hold="createMarker(mousePosition)"></div>

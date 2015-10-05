@@ -3,11 +3,63 @@
     height: 100%;
 }
 
+#search {
+  display: flex;
+    justify-content: center;
+    background-color: transparent;
+    position: fixed;
+    z-index: 10;
+    width: 100%;
+    padding-top: 5%;
+}
+
+#address {
+  min-height: 40px;
+  width: 90%;
+  padding-left: 20px;
+  box-shadow: 0px 0px 30px -5px rgba(0,0,0,0.75);
+}
+
+#button {
+  position: fixed;
+  margin: 0 auto;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 40%;
+  bottom: 5%;
+  right: 5%;
+}
+#button input {
+  color: white;
+  border: none;
+  box-shadow: 0px 0px 25px -5px rgba(0,0,0,0.75);
+  padding: 15px;
+}
+#currentLocButton {
+  background-color: rgba(66, 133, 244, 0.90);
+}
+
+#setArrowButton {
+  box-shadow: 0px 0px 25px -5px rgba(0,0,0,0.75);
+  display: block;
+  padding: 15px;
+  background-color: rgba(66, 133, 244, 0.90);
+  text-decoration: none;
+  margin-bottom: 15px;
+  text-align: center;
+  color: white;
+}
+
+#deleteMarkerButton {
+  background-color: rgba(247, 96, 83, 0.90);
+}
+
 #map {
     width: 100%;
     height: 100%;
 }
-
 
 #circle {
   margin: auto;
@@ -27,24 +79,3 @@
   border-radius: 20px;
   margin: auto;
 }
-
-#address {
-  display: inline;
-  border: solid;
-  border-width: 1px;
-  border-color: lightgrey;
-
-  border-radius: 5px;
-/*centers:  margin-top: 10px;
-  margin-left: auto; 
-  margin-right: auto;*/
-  text-align: center;
-  height: 20px;
-}
-
-.currentLocButton {
-  border-radius: 5px;
-  border-color: lightblue;
-  background-color: lightblue;
-}
-
