@@ -1,5 +1,6 @@
 <ion-view view-title="Compass">
-  <ion-content>
+<!--using 'ion-pane' instead of ion-content is one way to disable scroll in the compass view -->
+  <ion-pane>
 <!--     <div>{{markerPosition}}</div>
     <div>here: {{here}}</div>
     <div>there: {{there}}</div>
@@ -8,5 +9,5 @@
     <div id="circle" style={{rotation}}>
       <div id="arrow"></div>
     </div>
-  </ion-content>
+  </ion-pane>
 </ion-view>

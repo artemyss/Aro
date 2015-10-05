@@ -111,11 +111,6 @@ angular.module('starter.controllers', [])
   }; // end geocodeAddress
 
 })
-/*----------when user enters map tab view this loads current location view-----*/
-  // $scope.$on('$ionicView.enter', function(){
-  //   $scope.center();
-  // });
-
 
 /*optional array to store addresses if needed
   $scope.list = [];
@@ -128,10 +123,6 @@ angular.module('starter.controllers', [])
   };
 */
 
-
-/*-------geocodes a human readable address & stores long/lat in var coordsResult------*/
-
-
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
@@ -141,9 +132,9 @@ angular.module('starter.controllers', [])
   //});
 
 
-.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation) {
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
   // see http://ngcordova.com/docs/plugins/deviceOrientation
-
+  
   document.addEventListener("deviceready", function () {
     $scope.here;
     $scope.there;
