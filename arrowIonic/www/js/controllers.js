@@ -122,21 +122,26 @@ angular.module('starter.controllers', [])
 
 
 .controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
-  // see http://ngcordova.com/docs/plugins/deviceOrientation
+
 
   document.addEventListener("deviceready", function () {
     $scope.here;
     $scope.there;
     $scope.bearing;
     $scope.rotation;
+    $scope.distance;
+    $scope.heading;
+    $scope.compass;
 
-    var watchOptions = {
+
+    // see http://ngcordova.com/docs/plugins/geolocation
+    var locationOptions = {
       timeout: 3000,
       maximumAge: 10000,
       enableHighAccuracy: false // may cause errors if true
     };
 
-    $cordovaGeolocation.watchPosition(watchOptions)
+    $cordovaGeolocation.watchPosition(locationOptions)
       .then(
       null,
       function(err) {
@@ -147,14 +152,14 @@ angular.module('starter.controllers', [])
         $scope.there = turf.point([$rootScope.markerPosition["H"], $rootScope.markerPosition["L"]]);
         $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
         $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
+        $scope.distance = Number(turf.distance($scope.here, $scope.there, 'miles')).toFixed(2);
     });
 
 
-    $scope.heading;
-    $scope.compass;
-    var options = { frequency: 100 };   // how often the watch updates
+    // see http://ngcordova.com/docs/plugins/deviceOrientation
+    var orientationOptions = { frequency: 100 };   // how often the watch updates
 
-    $scope.watch = $cordovaDeviceOrientation.watchHeading(options).then(
+    $scope.watch = $cordovaDeviceOrientation.watchHeading(orientationOptions).then(
       null,
       function(error) {
         $scope.heading = err;
