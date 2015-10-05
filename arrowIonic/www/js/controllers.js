@@ -119,9 +119,9 @@ angular.module('starter.controllers', [])
   //});
 
 
-.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation) {
+.controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
   // see http://ngcordova.com/docs/plugins/deviceOrientation
-
+  
   document.addEventListener("deviceready", function () {
     $scope.here;
     $scope.there;
