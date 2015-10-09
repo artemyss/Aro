@@ -149,7 +149,7 @@ angular.module('starter.controllers', [])
       },
       function(position) {
         $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
-        $scope.there = turf.point([$rootScope.markerPosition["H"], $rootScope.markerPosition["L"]]);
+        $scope.there = turf.point([$rootScope.markerPosition["J"], $rootScope.markerPosition["M"]]);
         $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
         $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
         $scope.distance = Number(turf.distance($scope.here, $scope.there, 'miles')).toFixed(2);
