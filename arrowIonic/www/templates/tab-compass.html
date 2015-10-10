@@ -2,7 +2,7 @@
 <!--using 'ion-pane' instead of ion-content is one way to disable scroll in the compass view -->
   <ion-pane>
     <div class="bar bar-header bar-positive">
-      <h1 class="title">{{distance}} miles to your destination</h1>
+      <h1 class="title">{{distance.toFixed(2)}} miles to your destination</h1>
     </div>
     <div id="circle" style={{rotation}}>
       <div id="arrow"></div>
