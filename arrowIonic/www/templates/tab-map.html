@@ -2,10 +2,11 @@
     <ion-content>
       <div id="search">
         <!--search field -->
-        <input id="address" type="text" placeholder="Go to location" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
+        <input id="address" type="text" placeholder="Go to location{{hunt}}" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
       </div>
 
       <div id="button">
+        <input id="createHuntButton" type="submit" value="Start Hunt" on-tap="startHunt()"/>
         <!-- drop marker on current location button -->
         <input id="currentLocButton" type="submit" value="Current Location" on-tap="currentLocation()"/>
 

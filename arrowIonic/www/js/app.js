@@ -72,7 +72,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
         controller: 'HuntCtrl'
       }
     }
-  });  
+  });
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/tab/map');
