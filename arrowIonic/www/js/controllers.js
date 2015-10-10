@@ -1,7 +1,28 @@
 angular.module('starter.controllers', [])
 
 .controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation) {
+  var geo = google.maps.geometry.spherical;
   var initialize = function() {
+    var getLocation = function() {
+      $cordovaGeolocation.getCurrentPosition(watchOptions)
+        .then(refreshLocation, function(error) {
+          console.log('Could not get current location');
+          setTimeout(getLocation, 1000);
+        })
+    };
+
+    var refreshLocation = function(currentPosition) {
+      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+      $scope.currentMarker.setPosition($rootScope.currentPosition);
+
+      if ($rootScope.markerPosition) {
+        $rootScope.destHeading = geo.computeHeading($rootScope.currentPosition, $rootScope.markerPosition);
+        $rootScope.distance =
+          geo.computeDistanceBetween($rootScope.currentPosition, $rootScope.markerPosition) * 0.00062137; // meters -> miles
+      }
+      setTimeout(getLocation, 1000);
+    };
+
     var initializeMap = function() {
       var mapOptions = {
         center: $rootScope.currentPosition,
@@ -21,10 +42,13 @@ angular.module('starter.controllers', [])
         }
         infowindow.close();
       });
+
+      setTimeout(getLocation, 1000);
     };
 
     var watchOptions = {
-      timeout: 10000,
+      maximumAge: 3000,
+      timeout: 5000,
       enableHighAccuracy: true
     };
 
@@ -44,26 +68,8 @@ angular.module('starter.controllers', [])
         });
 
       }, function(error) {
-        console.log("Could not get current location");
+        console.log('Could not get current location');
       });
-
-    var refreshLocation = function(currentPosition) {
-      console.log($scope.currentMarker);
-      console.log($scope.currentMarker.position);
-      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
-      $scope.currentMarker.setPosition($rootScope.currentPosition);
-      console.log($scope.currentMarker.position);
-    };
-
-    // Update current location periodically
-    $cordovaGeolocation.watchPosition({
-      maximumAge: 10000,
-      timeout: 5000,
-      enableHighAccuracy: true
-    }).then(null, function(err) {
-        console.log(err);
-      }, refreshLocation
-    );
   };
 
   var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
@@ -153,29 +159,13 @@ angular.module('starter.controllers', [])
 
 .controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
   document.addEventListener("deviceready", function () {
-    // see http://ngcordova.com/docs/plugins/geolocation
     var locationOptions = {
-      timeout: 3000,
-      maximumAge: 10000,
+      maximumAge: 3000,
+      timeout: 5000,
       enableHighAccuracy: true // may cause errors if true
     };
 
-    var update = function() {
-      $cordovaGeolocation.getCurrentPosition(locationOptions)
-        .then(function(position) {
-          $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
-          $scope.there = turf.point([$rootScope.markerPosition["J"], $rootScope.markerPosition["M"]]);
-          $scope.bearing = turf.bearing($scope.here, $scope.there);
-          $scope.distance = Number(turf.distance($scope.here, $scope.there, 'miles')).toFixed(2);
-        }, function(err) {
-          console.log(err);
-        });
-    };
-
-    setInterval(update, 1000);
-
-    // see http://ngcordova.com/docs/plugins/deviceOrientation
-    var orientationOptions = { frequency: 100 };   // how often the watch updates
+    var orientationOptions = {frequency: 100};   // how often the watch updates
 
     $scope.watch = $cordovaDeviceOrientation.watchHeading(orientationOptions).then(
       null,
@@ -183,7 +173,7 @@ angular.module('starter.controllers', [])
         $scope.heading = err;
       },
       function(result) {
-        $scope.rotation = 'transform: rotate('+ Math.floor($scope.bearing - result.magneticHeading + 90) +'deg)';
+        $scope.rotation = 'transform: rotate('+ Math.floor($rootScope.destHeading - result.magneticHeading) +'deg)';
       });
 
     }, false);
