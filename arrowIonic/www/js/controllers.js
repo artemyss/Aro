@@ -187,5 +187,18 @@ angular.module('starter.controllers', [])
       });
 
     }, false);
+})
+
+
+.controller('HuntCtrl', function($rootScope, $scope) {
+
+
+  // Will hold every available scavenger hunt
+  $scope.allHunts = ["Hunt 0", "Hunt 1", "Hunt 2"];
+
+  $scope.updateHunt = function(hunt){
+    $rootScope.scavengerHunt = $scope.allHunts[hunt];
+    console.log("Current scavenger hunt: ", $rootScope.scavengerHunt);
+  }
 });
 
