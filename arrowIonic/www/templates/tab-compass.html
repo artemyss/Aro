@@ -4,8 +4,14 @@
     <div class="bar bar-header bar-positive">
       <h1 class="title">{{distance.toFixed(2)}} miles to your destination</h1>
     </div>
-    <div id="circle" style={{rotation}}>
-      <div id="arrow"></div>
-    </div>
+    <ion-content class="has-subheader" padding="true">
+      <h4 class="title">Location {{count + 1}}: {{checkpoint.name}}</h4>
+      <p class="description info">{{checkpoint.desc}}</p>
+      <div>
+        <div id="circle" style={{rotation}}>
+          <div id="arrow"></div>
+        </div>
+      </div>
+    </ion-content>
   </ion-pane>
 </ion-view>
