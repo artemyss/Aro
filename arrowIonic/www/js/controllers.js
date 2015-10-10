@@ -1,41 +1,70 @@
 angular.module('starter.controllers', [])
 
 .controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation) {
+  var initialize = function() {
+    var initializeMap = function() {
+      var mapOptions = {
+        center: $rootScope.currentPosition,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        disableDefaultUI: true,
+      };
 
-  // Get geolocation of user's current position and initialize map
-  $cordovaGeolocation.getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
-    .then(function(currentPosition) {
+      $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
-      $scope.geocoder = new google.maps.Geocoder();
-      initializeMap($rootScope.currentPosition);
-
-    }, function(error) {
-      console.log("Could not get current location");
-    }); // end cordovaGeolocation
-
-  var initializeMap = function(currentPosition) {
-
-    var mapOptions = {
-      center: currentPosition,
-      zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true,
+      google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
+        $scope.mousePosition = e.latLng;
+        if (document.getElementById('deleteMarkerButton').style.display === 'block') {
+          document.getElementById('setArrowButton').style.display = 'none';
+          document.getElementById('deleteMarkerButton').style.display = 'none';
+          document.getElementById('currentLocButton').style.display = 'block';
+        }
+        infowindow.close();
+      });
     };
 
-    $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    var watchOptions = {
+      timeout: 10000,
+      enableHighAccuracy: true
+    };
 
-    google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
-      $scope.mousePosition = e.latLng;
-      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
-        document.getElementById('setArrowButton').style.display = 'none';
-        document.getElementById('deleteMarkerButton').style.display = 'none';
-        document.getElementById('currentLocButton').style.display = 'block';
-      }
-      infowindow.close();
-    });
+    // Get user's current geolocation
+    $cordovaGeolocation.getCurrentPosition(watchOptions)
+      .then(function(currentPosition) {
+        $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+        $scope.geocoder = new google.maps.Geocoder();
+        initializeMap();
 
-  }; // end initializeMap
+        // Create a marker representing user's current location
+        var image = 'img/current.png';
+        $scope.currentMarker = new google.maps.Marker({
+          position: $rootScope.currentPosition,
+          map: $scope.map,
+          icon: image
+        });
+
+      }, function(error) {
+        console.log("Could not get current location");
+      });
+
+    var refreshLocation = function(currentPosition) {
+      console.log($scope.currentMarker);
+      console.log($scope.currentMarker.position);
+      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+      $scope.currentMarker.setPosition($rootScope.currentPosition);
+      console.log($scope.currentMarker.position);
+    };
+
+    // Update current location periodically
+    $cordovaGeolocation.watchPosition({
+      maximumAge: 10000,
+      timeout: 5000,
+      enableHighAccuracy: true
+    }).then(null, function(err) {
+        console.log(err);
+      }, refreshLocation
+    );
+  };
 
   var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
 
@@ -110,6 +139,7 @@ angular.module('starter.controllers', [])
 
   }; // end geocodeAddress
 
+  document.addEventListener('deviceready', initialize, false);
 })
 
   // With the new view caching in Ionic, Controllers are only called
