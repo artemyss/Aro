@@ -3,12 +3,17 @@
     height: 100%;
 }
 
+.info {
+  height: 25%;
+}
+
 #circle {
-  margin: 50% auto;
-  width:300px;
-  height:300px;
+  margin: 0 auto;
+  width:250px;
+  height:250px;
   background-color: #E8ECFA;
   border-radius: 50%;
+  transition: transform 1s;
 }
 
 #arrow {
@@ -16,9 +21,10 @@
   height: 0;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  border-bottom: 300px solid #002AB3;
+  border-bottom: 250px solid #002AB3;
   border-radius: 50px;
   margin: auto;
+  transition: transform 1s;
 }
 
 #search {
