@@ -1,0 +1,8 @@
+<ion-view view-title="Hunt">
+    <ion-content>
+      <button ng-repeat="(key, value) in allHunts" class="button button-positive button-full" ng-click="updateHunt(key)">
+        {{ value }}
+      </button>
+      <button class="button button-balanced button-full">Add a new Scavenger Hunt + </button>
+    </ion-content>
+</ion-view>

@@ -62,7 +62,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
         controller: 'CompassCtrl'
       }
     }
-  });
+  })
+
+  .state('tab.hunt', {
+    url: '/hunt',
+    views: {
+      'tab-hunt': {
+        templateUrl: 'templates/tab-hunt.html',
+        controller: 'HuntCtrl'
+      }
+    }
+  });  
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/tab/map');
