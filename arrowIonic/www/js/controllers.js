@@ -57,11 +57,6 @@ angular.module('starter.controllers', [])
     $state.go('tab.map');
   };
 
-  $rootScope.saveHunt = function(hunt) {
-    console.log('Placeholder: This should be in huntCtrl.');
-    console.log(hunt);
-  };
-
   $rootScope.loadHunt = function(hunt) {
     $scope.mode = 'hunt';
     $scope.huntName = hunt.name;
@@ -429,18 +424,13 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('HuntCtrl', function($rootScope, $scope) {
+.controller('HuntCtrl', function($rootScope, $scope, Firebase) {
 
+  $scope.allHunts = Firebase.getHunts() || [];
 
-  // Will hold every available scavenger hunt
-  $scope.allHunts = [];
-
-
-
-
-  $scope.updateHunt = function(hunt){
-    $rootScope.scavengerHunt = $scope.allHunts[hunt];
-    console.log("Current scavenger hunt: ", $rootScope.scavengerHunt);
+  $rootScope.saveHunt = function(hunt) {
+    $scope.allHunts.push(hunt);
   };
+
 });
 
