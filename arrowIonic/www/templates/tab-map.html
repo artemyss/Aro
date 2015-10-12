@@ -30,14 +30,17 @@
 <ion-view view-title="Map">
     <ion-content>
       <div class="bar bar-header bar-assertive" ng-show="mode === 'create'">
+        <button class="button icon ion-ios-cog" on-tap="zoom()"></button>
         <h1 class="title">Create Mode</h1>
-        <button class="button button-positive" on-tap="saveModal.show()">Save</button>
+        <button class="button button-positive" on-tap="saveModal.show()" ng-show="waypoints.length !== 0">Save</button>
       </div>
       <div class="bar bar-header bar-balanced" ng-show="mode === 'hunt' && huntProgress === null">
+        <button class="button icon ion-ios-cog" on-tap="zoom()"></button>
         <h1 class="title">No Waypoint Loaded</h1>
         <button class="button button-positive" on-tap="goToLoad()">Load</button>
       </div>
       <div class="bar bar-header bar-balanced" ng-show="mode === 'hunt' && huntProgress !== null">
+        <button class="button icon ion-ios-cog" on-tap="zoom()"></button>
         <h1 class="title">{{huntName}}</h1>
         <button class="button button-positive" on-tap="goToLoad()" ng-show="!nextDestination">Load</button>
       </div>
