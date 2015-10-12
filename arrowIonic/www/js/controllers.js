@@ -424,12 +424,15 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('HuntCtrl', function($rootScope, $scope, Firebase) {
+.controller('HuntCtrl', function($rootScope, $scope, Hunts ) {
 
-  $scope.allHunts = Firebase.getHunts() || [];
+  $scope.allHunts = Hunts
+
+  console.log($scope.allHunts);
 
   $rootScope.saveHunt = function(hunt) {
-    $scope.allHunts.push(hunt);
+    $scope.allHunts.$add(hunt);
+    console.log($scope.allHunts);
   };
 
 });
