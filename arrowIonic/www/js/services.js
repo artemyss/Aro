@@ -1,26 +1,30 @@
+/*
+* In the controller, inject Hunts factory and assign it to the scope variable
+* that holds list of all hunts. e.g.:
+
+.controller('HuntCtrl', function($scope, Hunts) {
+  $scope.allHunts = Hunts;
+  $scope.addHunt = function(hunt) {
+    $scope.allHunts.$add(hunt);
+  };
+})
+
+* Then use AngularFire provided methods $add(), $save(), $remove()
+* to manipulate the hunts array.
+*
+* DO NOT directly modify array using push() or splice()
+*
+* Refer below links for more on AngularFire
+* https://www.firebase.com/docs/web/libraries/ionic/guide.html
+* https://www.firebase.com/docs/web/libraries/angular/quickstart.html
+*
+*/
+
 angular.module('starter.services', [])
 
-.factory('Firebase', [
-  function() {
-
-    var _hunts = [];
-    var service = {};
-    var firebase = new Firebase('https://boiling-heat-1054.firebaseio.com/');
-
-    service.addHunt = function(hunt) {
-      var newHunt = firebase.push(hunt);
-      return newHunt;
-    };
-
-    // listener to sync hunts from server
-    firebase.on('value', function(snapshot) {
-      _hunts = snapshot.val();
-    });
-
-    service.getHunts = function() {
-      return _hunts;
-    };
-
-    return service;
+.factory('Hunts', ['$firebaseArray',
+  function($firebaseArray) {
+    var huntsRef = new Firebase('https://boiling-heat-1054.firebaseio.com/hunts');
+    return $firebaseArray(huntsRef);
   }
 ]);
