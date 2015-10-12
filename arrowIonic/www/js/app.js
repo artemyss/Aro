@@ -22,7 +22,7 @@ angular.module('starter', ['ionic', 'starter.services', 'starter.controllers', '
     }
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
-      StatusBar.styleLightContent();
+      //StatusBar.styleLightContent();
     }
   });
 })

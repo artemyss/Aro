@@ -4,8 +4,8 @@ angular.module('starter.controllers', [])
   $scope.mode = 'hunt';
   $scope.waypoints = [];
   $scope.waypointList = [];
+  $scope.searchCircles = [];
   $scope.selectedID = null;
-  $scope.huntName = 'Placeholder Hunt!';
   $rootScope.huntProgress = null;
   $rootScope.previousLocation = null;
   $rootScope.nextDestination = null;
@@ -22,29 +22,39 @@ angular.module('starter.controllers', [])
   });
 
   $scope.$on('modal.hidden', function() {
-    $scope.newHunt.name = "";
-    $scope.newHunt.scavenger = false;
+    delete $scope.newHunt.name;
+    delete $scope.newHunt.scavenger;
   });
 
   $rootScope.switchMode = function() {
     if ($scope.mode === 'hunt') { // Pressing the "add a new Scavenger Hunt +" button
-      $scope.mode = 'create';
-      $scope.clearWaypoints();
+      $rootScope.createHunt();
     } else {
-      $scope.mode = 'hunt'; // Pressing a scavenger hunt in the list
-      // save/load simulation
-      var savedList = $scope.waypointList;
-      $scope.clearWaypoints();
-      $scope.setWaypoints(savedList);
-
-      $rootScope.huntProgress = null;
-      $scope.getNextDestination();
+      // simulate loading
+      var testHunt = {
+        "name": "Dev Test Hunt",
+        "waypoints": [
+          {
+            "position":{"J":34.13848453006043,"M":-117.50534534454346},
+            "name":"First destination",
+            "description":"Wow, you finally got to a destination!"
+          },
+          {
+            "position":{"J":34.14342171108033,"M":-117.49684810638428},
+            "name":"Final destination",
+            "description":"Yeah, this is a pretty short scavenger hunt."
+          }
+        ],
+        "scavenger": true
+      };
+      $rootScope.loadHunt(testHunt);
     }
   };
 
   $rootScope.createHunt = function() {
     $scope.mode = 'create';
     $scope.clearWaypoints();
+    $state.go('tab.map');
   };
 
   $rootScope.saveHunt = function(hunt) {
@@ -56,16 +66,17 @@ angular.module('starter.controllers', [])
     $scope.mode = 'hunt';
     $scope.huntName = hunt.name;
     $scope.clearWaypoints();
-    $scope.setWaypoints(hunt.waypoints);
+    $scope.setWaypoints(hunt.waypoints, hunt.scavenger);
     $rootScope.huntProgress = null;
     $scope.getNextDestination();
+    $state.go('tab.compass');
   };
 
   $scope.preSave = function() {
     $rootScope.saveHunt({
       name: $scope.newHunt.name,
       waypoints: $scope.waypointList,
-      scavenger: $scope.newHunt.scavenger
+      scavenger: $scope.newHunt.scavenger || false
     });
     $scope.saveModal.hide();
 
@@ -79,13 +90,17 @@ angular.module('starter.controllers', [])
     $state.go('tab.hunt');
   };
 
-  $scope.setWaypoints = function(waypointList) {
+  $scope.setWaypoints = function(waypointList, scavengerMode) {
     for (var i = 0, j = waypointList.length; i < j; i++) {
       var waypoint = new google.maps.Marker({
         map: $scope.map,
         icon: preIcon + labels[i % labels.length] + '|F78181',
-        position: waypointList[i].position
+        position: new google.maps.LatLng(waypointList[i].position.J, waypointList[i].position.M)
       });
+
+      if (scavengerMode) {
+        waypoint.setVisible(false);
+      }
 
       waypoint.id = i;
 
@@ -107,8 +122,24 @@ angular.module('starter.controllers', [])
       $scope.waypoints[i] = null;
     }
 
+    for (var i = 0, j = $scope.searchCircles.length; i < j; i++) {
+      $scope.searchCircles[i].setMap(null);
+      $scope.searchCircles[i] = null;
+    }
+
     $scope.waypoints = [];
     $scope.waypointList = [];
+    $scope.searchCircles = [];
+  };
+
+  $scope.zoom = function() {
+    if ($scope.map.zoom === 15) {
+      $scope.map.setZoom(10);
+    } else if ($scope.map.zoom === 10) {
+      $scope.map.setZoom(5);
+    } else {
+      $scope.map.setZoom(15);
+    }
   };
 
   var initialize = function() {
@@ -200,6 +231,7 @@ angular.module('starter.controllers', [])
     } else {
       $scope.waypoints[$rootScope.huntProgress]
         .setIcon(preIcon + labels[$rootScope.huntProgress % labels.length] + '|2EFE64');
+      $scope.waypoints[$rootScope.huntProgress].setVisible(true);
       $rootScope.previousLocation = $scope.waypointList[$rootScope.huntProgress];
       $rootScope.huntProgress++;
       $rootScope.nextDestination = $scope.waypointList[$rootScope.huntProgress] ?
