@@ -2,11 +2,20 @@
 <!--using 'ion-pane' instead of ion-content is one way to disable scroll in the compass view -->
   <ion-pane>
     <div class="bar bar-header bar-positive">
+      <h1 class="title" ng-show="!nextDestination && !huntProgress">No Waypoint Loaded</h1>
+      <h1 class="title" ng-show="!nextDestination && huntProgress">Destination Reached</h1>
+      <h1 class="title" ng-show="nextDestination">Next Location: {{nextDestination.name}}</h1>
+    </div>
+    <div class="bar bar-subheader bar-positive" ng-show="nextDestination">
       <h1 class="title">{{distance.toFixed(2)}} miles to your destination</h1>
     </div>
     <ion-content class="has-subheader" padding="true">
-      <h4 class="title">Location {{count + 1}}: {{checkpoint.name}}</h4>
-      <p class="description info">{{checkpoint.desc}}</p>
+      <h4 class="title" ng-show="huntProgress === null"></h4>
+      <h4 class="title" ng-show="huntProgress === 0">Welcome!</h4>
+      <h4 class="title" ng-show="huntProgress > 0">Location {{huntProgress}}: {{previousLocation.name}}</h4>
+      <p class="description info" ng-show="huntProgress === null"></p>
+      <p class="description info" ng-show="huntProgress === 0">Follow the compass to your first destination.</p>
+      <p class="description info" ng-show="huntProgress > 0">{{previousLocation.description}}</p>
       <div>
         <div id="circle" style={{rotation}}>
           <div id="arrow"></div>

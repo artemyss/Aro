@@ -1,7 +1,116 @@
 angular.module('starter.controllers', [])
 
-.controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation, $state) {
+.controller('MapCtrl', function($rootScope, $scope, $state, $ionicPopup, $ionicModal, $cordovaGeolocation) {
+  $scope.mode = 'hunt';
+  $scope.waypoints = [];
+  $scope.waypointList = [];
+  $scope.selectedID = null;
+  $scope.huntName = 'Placeholder Hunt!';
+  $rootScope.huntProgress = null;
+  $rootScope.previousLocation = null;
+  $rootScope.nextDestination = null;
+  $scope.newHunt = {};
+  var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var preIcon = 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld=';
   var geo = google.maps.geometry.spherical;
+
+  $ionicModal.fromTemplateUrl('save-modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.saveModal = modal;
+  });
+
+  $scope.$on('modal.hidden', function() {
+    $scope.newHunt.name = "";
+    $scope.newHunt.scavenger = false;
+  });
+
+  $rootScope.switchMode = function() {
+    if ($scope.mode === 'hunt') { // Pressing the "add a new Scavenger Hunt +" button
+      $scope.mode = 'create';
+      $scope.clearWaypoints();
+    } else {
+      $scope.mode = 'hunt'; // Pressing a scavenger hunt in the list
+      // save/load simulation
+      var savedList = $scope.waypointList;
+      $scope.clearWaypoints();
+      $scope.setWaypoints(savedList);
+
+      $rootScope.huntProgress = null;
+      $scope.getNextDestination();
+    }
+  };
+
+  $rootScope.createHunt = function() {
+    $scope.mode = 'create';
+    $scope.clearWaypoints();
+  };
+
+  $rootScope.saveHunt = function(hunt) {
+    console.log('Placeholder: This should be in huntCtrl.');
+    console.log(hunt);
+  };
+
+  $rootScope.loadHunt = function(hunt) {
+    $scope.mode = 'hunt';
+    $scope.huntName = hunt.name;
+    $scope.clearWaypoints();
+    $scope.setWaypoints(hunt.waypoints);
+    $rootScope.huntProgress = null;
+    $scope.getNextDestination();
+  };
+
+  $scope.preSave = function() {
+    $rootScope.saveHunt({
+      name: $scope.newHunt.name,
+      waypoints: $scope.waypointList,
+      scavenger: $scope.newHunt.scavenger
+    });
+    $scope.saveModal.hide();
+
+    $scope.mode = 'hunt';
+    $scope.clearWaypoints();
+    $rootScope.huntProgress = null;
+    $state.go('tab.hunt');
+  };
+
+  $scope.goToLoad = function() {
+    $state.go('tab.hunt');
+  };
+
+  $scope.setWaypoints = function(waypointList) {
+    for (var i = 0, j = waypointList.length; i < j; i++) {
+      var waypoint = new google.maps.Marker({
+        map: $scope.map,
+        icon: preIcon + labels[i % labels.length] + '|F78181',
+        position: waypointList[i].position
+      });
+
+      waypoint.id = i;
+
+      google.maps.event.addListener(waypoint, 'click', function() {
+        $scope.selectedID = this.id;
+        infowindow.setContent($scope.waypointList[this.id].name);
+        infowindow.open($scope.map, this);
+      });
+
+      $scope.waypoints.push(waypoint);
+    }
+
+    $scope.waypointList = waypointList;
+  };
+
+  $scope.clearWaypoints = function() {
+    for (var i = 0, j = $scope.waypoints.length; i < j; i++) {
+      $scope.waypoints[i].setMap(null);
+      $scope.waypoints[i] = null;
+    }
+
+    $scope.waypoints = [];
+    $scope.waypointList = [];
+  };
+
   var initialize = function() {
     var getLocation = function() {
       $cordovaGeolocation.getCurrentPosition(watchOptions)
@@ -12,15 +121,15 @@ angular.module('starter.controllers', [])
     };
 
     var refreshLocation = function(currentPosition) {
-      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
-      $scope.currentMarker.setPosition($rootScope.currentPosition);
+      $scope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+      $scope.currentMarker.setPosition($scope.currentPosition);
 
-      if ($rootScope.markerPosition) {
-        $rootScope.destHeading = geo.computeHeading($rootScope.currentPosition, $rootScope.markerPosition);
+      if ($scope.mode === 'hunt' && $rootScope.nextDestination) {
+        $rootScope.destHeading = geo.computeHeading($scope.currentPosition, $rootScope.nextDestination.position);
         $rootScope.distance =
-          geo.computeDistanceBetween($rootScope.currentPosition, $rootScope.markerPosition) * 0.00062137; // meters -> miles
-        if ($rootScope.distance < 0.2 && $rootScope.nextCheckpoint && typeof $rootScope.nextCheckpoint === 'function') {
-          $rootScope.nextCheckpoint();
+          geo.computeDistanceBetween($scope.currentPosition, $rootScope.nextDestination.position) * 0.00062137; // meters -> miles
+        if ($rootScope.distance < 0.1) {
+          $scope.getNextDestination();
         }
       }
       setTimeout(getLocation, 1000);
@@ -28,21 +137,18 @@ angular.module('starter.controllers', [])
 
     var initializeMap = function() {
       var mapOptions = {
-        center: $rootScope.currentPosition,
+        center: $scope.currentPosition,
         zoom: 15,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         disableDefaultUI: true,
+        disableDoubleClickZoom: true,
       };
 
       $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-      google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
+      google.maps.event.addDomListener($scope.map, 'click', function(e){
         $scope.mousePosition = e.latLng;
-        if (document.getElementById('deleteMarkerButton').style.display === 'block') {
-          document.getElementById('setArrowButton').style.display = 'none';
-          document.getElementById('deleteMarkerButton').style.display = 'none';
-          document.getElementById('currentLocButton').style.display = 'block';
-        }
+        $scope.selectedID = null;
         infowindow.close();
       });
 
@@ -58,16 +164,20 @@ angular.module('starter.controllers', [])
     // Get user's current geolocation
     $cordovaGeolocation.getCurrentPosition(watchOptions)
       .then(function(currentPosition) {
-        $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+        $scope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
         $scope.geocoder = new google.maps.Geocoder();
         initializeMap();
 
         // Create a marker representing user's current location
         var image = 'img/current.png';
         $scope.currentMarker = new google.maps.Marker({
-          position: $rootScope.currentPosition,
+          position: $scope.currentPosition,
           map: $scope.map,
           icon: image
+        });
+
+        google.maps.event.addListener($scope.currentMarker, 'click', function() {
+          event.stopPropagation();
         });
 
       }, function(error) {
@@ -75,82 +185,162 @@ angular.module('starter.controllers', [])
       });
   };
 
-  var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
+  var infowindow = new google.maps.InfoWindow({content: 'Selected'});
+
+  google.maps.event.addListener(infowindow, 'closeclick', function() {
+    $scope.selectedID = null;
+  });
+
+  $scope.getNextDestination = function() {
+    if ($rootScope.huntProgress === null) {
+      if ($scope.waypointList.length > 0) {
+        $rootScope.nextDestination = $scope.waypointList[0];
+        $rootScope.huntProgress = 0;
+      }
+    } else {
+      $scope.waypoints[$rootScope.huntProgress]
+        .setIcon(preIcon + labels[$rootScope.huntProgress % labels.length] + '|2EFE64');
+      $rootScope.previousLocation = $scope.waypointList[$rootScope.huntProgress];
+      $rootScope.huntProgress++;
+      $rootScope.nextDestination = $scope.waypointList[$rootScope.huntProgress] ?
+        $scope.waypointList[$rootScope.huntProgress] : null;
+    }
+  };
 
   $scope.currentLocation = function() {
-    $scope.map.setCenter($rootScope.currentPosition);
+    $scope.map.setCenter($scope.currentPosition);
+    infowindow.close();
   };
 
-  $scope.allTitles = ["New York", "Oregon", "Texas", "Florida"];
-  $scope.allDesc = [
-    "Desc 1",
-    "Desc 2",
-    "Desc 3",
-    "Desc 4",
-  ];
-  $rootScope.hunt = [];
-
-  $scope.countB = 0;
-
-
-  $scope.makeCheckpoint = function (position) {
-    this.name = $scope.allTitles[$scope.countB++];
-    this.desc = $scope.allDesc[$scope.countB];
-    this.position = position;
+  $scope.goToStart = function() {
+    $scope.selectedID = 0;
+    $scope.map.setCenter($scope.waypoints[0].position);
+    infowindow.setContent($scope.waypointList[0].name);
+    infowindow.open($scope.map, $scope.waypoints[0]);
   };
 
-  var markers = [];
-  var markerID = 0;
-  $scope.createMarker = function(position) {
+  $scope.previousWaypoint = function() {
+    $scope.map.setCenter($scope.waypoints[--$scope.selectedID].position);
+    infowindow.setContent($scope.waypointList[$scope.selectedID].name);
+    infowindow.open($scope.map, $scope.waypoints[$scope.selectedID]);
+  };
 
-    // Save the location of where the marker is created
-    // to access from the compass
-    $rootScope.markerPosition = position;
-    $rootScope.hunt.push(new $scope.makeCheckpoint(position));
-    console.log($rootScope.hunt);
-    var marker = new google.maps.Marker({
-      map: $scope.map,
-      animation: google.maps.Animation.DROP,
-      draggable: true,
-      position: position
-    });
+  $scope.nextWaypoint = function() {
+    $scope.map.setCenter($scope.waypoints[++$scope.selectedID].position);
+    infowindow.setContent($scope.waypointList[$scope.selectedID].name);
+    infowindow.open($scope.map, $scope.waypoints[$scope.selectedID]);
+  };
 
-    marker.id = markerID;
-    markerID++;
-    markers.push(marker);
+  $scope.createWaypoint = function() {
+    if ($scope.mode === 'create' && $scope.mousePosition) {
+      var waypoint = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        icon: preIcon + labels[$scope.waypoints.length % labels.length] + '|F78181',
+        draggable: true,
+        position: $scope.mousePosition
+      });
 
-    marker.addListener('click', function() {
-      $scope.markerID = this.id;
-      if (document.getElementById('deleteMarkerButton').style.display === 'block') {
-        document.getElementById('setArrowButton').style.display = 'none';
-        document.getElementById('deleteMarkerButton').style.display = 'none';
-        document.getElementById('currentLocButton').style.display = 'block';
-      } else {
-        document.getElementById('setArrowButton').style.display = 'block';
-        document.getElementById('deleteMarkerButton').style.display = 'block';
-        document.getElementById('currentLocButton').style.display = 'none';
-      }
-      infowindow.open($scope.map, marker);
-    });
+      $scope.mousePosition = null;
 
-    if (position === $rootScope.currentPosition) $scope.map.setCenter(position);
+      waypoint.id = $scope.waypoints.length;
+      $scope.waypointInfo = {position: waypoint.position};
 
-  }; // end createMarker
+      var cancel = false;
 
+      var waypointNameEditor = $ionicPopup.show({
+        template: '<input type="text" ng-model="waypointInfo.name">',
+        title: 'Enter Waypoint Name',
+        scope: $scope,
+        buttons: [
+          {
+            text: 'Cancel',
+            onTap: function() {
+              cancel = true;
+            }
+          },
 
+          {
+            text: 'Next',
+            type: 'button-positive',
+            onTap: function(e) {
+              if (!$scope.waypointInfo.name) {
+                e.preventDefault();
+              }
+            }
+          }
+        ]
+      });
 
-  $scope.deleteMarker = function(markerID) {
-    for (var i = 0; i < markers.length; i++) {
-      if (markers[i].id === markerID) {
-        markers[i].setMap(null);
-        markers.splice(i, 1);
-        document.getElementById('deleteMarkerButton').style.display = 'none';
-        document.getElementById('setArrowButton').style.display = 'none';
-        document.getElementById('currentLocButton').style.display = 'block';
-        return;
-      }
+      waypointNameEditor.then(function() {
+        if (cancel) {
+          waypoint.setMap(null);
+          waypoint = null;
+          return;
+        } else {
+          var waypointDescEditor = $ionicPopup.show({
+            template: '<textarea rows="6" maxlength="200" ng-model="waypointInfo.description">',
+            title: 'Enter Waypoint Description',
+            scope: $scope,
+            buttons: [
+              {
+                text: 'Cancel',
+                onTap: function() {
+                  cancel = true;
+                }
+              },
+
+              {
+                text: 'Save',
+                type: 'button-positive',
+                onTap: function(e) {
+                  if (!$scope.waypointInfo.description) {
+                    e.preventDefault();
+                  }
+                }
+              }
+            ]
+          });
+
+          waypointDescEditor.then(function() {
+            if (cancel) {
+              waypoint.setMap(null);
+              waypoint = null;
+              return;
+            } else {
+              google.maps.event.addListener(waypoint, 'click', function() {
+                $scope.selectedID = this.id;
+                infowindow.setContent($scope.waypointList[this.id].name);
+                infowindow.open($scope.map, this);
+              });
+
+              google.maps.event.addListener(waypoint, 'dragend', function() {
+                $scope.waypointList[this.id].position = this.getPosition();
+              });
+
+              $scope.waypoints.push(waypoint);
+              $scope.waypointList.push($scope.waypointInfo);
+            }
+          });
+        }
+      });
     }
-  }; // end deleteMarker
+  };
+
+  $scope.deleteWaypoint = function() {
+    $scope.waypoints[$scope.selectedID].setMap(null);
+    $scope.waypoints[$scope.selectedID] = null;
+    $scope.waypoints.splice($scope.selectedID, 1);
+
+    // update existing waypoints after removing one
+    for (var i = $scope.selectedID, j = $scope.waypoints.length; i < j; i++) {
+      $scope.waypoints[i].id = i;
+      $scope.waypoints[i].setIcon(preIcon + labels[i % labels.length] + '|F78181');
+    }
+
+    $scope.waypointList.splice($scope.selectedID, 1);
+    $scope.selectedID = null;
+  };
 
   // geocodes a human readable address & stores long/lat in var coordsResult
   $scope.geocodeAddress = function(geocoder, map) {
@@ -161,21 +351,11 @@ angular.module('starter.controllers', [])
       if (status === google.maps.GeocoderStatus.OK) {
         $scope.map.setCenter(results[0].geometry.location);
         var coordsResult = results[0].geometry.location;
-        console.log(coordsResult);
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
     });
 
-  }; // end geocodeAddress
-
-  $scope.startHunt = function() {
-    $rootScope.count = 0;
-    $state.go('tab.compass');
-    // go to compass view
-      // outside of this controller
-      // in compassctrl initialize
-      // iterate over $rootScope.hunt
   };
 
   document.addEventListener('deviceready', initialize, false);
@@ -192,20 +372,6 @@ angular.module('starter.controllers', [])
 
 .controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
   document.addEventListener("deviceready", function () {
-    $scope.checkpoint = $rootScope.hunt[$rootScope.count];
-    $rootScope.markerPosition = $scope.checkpoint.position;
-    $rootScope.nextCheckpoint = function () {
-      $scope.checkpoint = $rootScope.hunt[++$rootScope.count];
-      if ($rootScope.count === $rootScope.hunt.length) {
-        console.log("YOU WIN!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      }
-      $rootScope.markerPosition = $scope.checkpoint.position;
-    };
-    console.log('checkpoint:', $scope.checkpoint);
-    console.log('currentPosition:', $rootScope.currentPosition);
-    console.log('markerPosition:', $rootScope.markerPosition);
-
-
     var locationOptions = {
       maximumAge: 3000,
       timeout: 5000,
@@ -220,7 +386,11 @@ angular.module('starter.controllers', [])
         $scope.heading = err;
       },
       function(result) {
-        $scope.rotation = 'transform: rotate('+ Math.floor($rootScope.destHeading - result.magneticHeading) +'deg)';
+        if ($rootScope.nextDestination) {
+          $scope.rotation = 'transform: rotate('+ Math.floor($rootScope.destHeading - result.magneticHeading) +'deg)';
+        } else {
+          $scope.rotation = 'transform: rotate(0deg)';
+        }
       });
 
     }, false);

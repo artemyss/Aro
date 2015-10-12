@@ -1,23 +1,80 @@
+<script id="save-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar class="bar bar-header bar-positive">
+      <h1 class="title">Save Waypoints</h1>
+      <button class="button button-clear" ng-click="saveModal.hide()">Cancel</button>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <div class="list list-inset">
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">Adventure Name</span>
+          <input ng-model="newHunt.name" type="text" placeholder="New Adventure">
+        </label>
+      </div>
+      <ul class="list">
+        <li class="item item-toggle">
+          Scavenger Hunt
+          <label class="toggle">
+            <input type="checkbox" ng-model="newHunt.scavenger">
+            <div class="track">
+              <div class="handle"></div>
+            </div>
+          </label>
+        </li>
+      </ul>
+        <button class="button button-full button-positive" ng-click="preSave()">Save</button>
+    </ion-content>
+  </ion-modal-view>
+</script>
+
 <ion-view view-title="Map">
     <ion-content>
+      <div class="bar bar-header bar-assertive" ng-show="mode === 'create'">
+        <h1 class="title">Create Mode</h1>
+        <button class="button button-positive" on-tap="saveModal.show()">Save</button>
+      </div>
+      <div class="bar bar-header bar-balanced" ng-show="mode === 'hunt' && huntProgress === null">
+        <h1 class="title">No Waypoint Loaded</h1>
+        <button class="button button-positive" on-tap="goToLoad()">Load</button>
+      </div>
+      <div class="bar bar-header bar-balanced" ng-show="mode === 'hunt' && huntProgress !== null">
+        <h1 class="title">{{huntName}}</h1>
+        <button class="button button-positive" on-tap="goToLoad()" ng-show="!nextDestination">Load</button>
+      </div>
       <div id="search">
-        <!--search field -->
-        <input id="address" type="text" placeholder="Go to location{{hunt}}" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
+        <input id="address" type="text" placeholder="Go to location" ng-model="text" name="text" ng-keyup="$event.keyCode == 13 && geocodeAddress()"/>
       </div>
 
       <div id="button">
-        <input id="createHuntButton" type="submit" value="Start Hunt" on-tap="startHunt()"/>
-        <!-- drop marker on current location button -->
-        <input id="currentLocButton" type="submit" value="Current Location" on-tap="currentLocation()"/>
+        <button class="button button-small button-balanced" on-tap="switchMode()">
+          Switch Mode (Dev)
+        </button>
+        <button class="button button-small button-stable" on-tap="previousWaypoint()"
+        ng-show="mode === 'create' && selectedID !== null && selectedID !== 0">
+          Previous Waypoint
+        </button>
+        <button class="button button-small button-stable" on-tap="nextWaypoint()"
+        ng-show="mode === 'create' && selectedID !== null && selectedID !== waypoints.length - 1">
+          Next Waypoint
+        </button>
+        <button class="button button-stable"  on-tap="goToStart()"
+        ng-show="mode === 'create' && selectedID === null && waypoints.length !== 0">
+          Go to Start
+        </button>
 
         <!-- delete marker that has been clicked -->
-        <a id="setArrowButton" style="display: none" href="#/tab/compass">Guide me here</a>
-        <input id="deleteMarkerButton" style="display: none" type="submit" value="Delete marker" on-tap="deleteMarker(markerID)"/>
+        <button class="button button-assertive" on-tap="deleteWaypoint()" ng-show="mode === 'create' && selectedID !== null">
+          Delete Waypoint
+        </button>
+
+        <!-- drop marker on current location button -->
+        <button class="button button-positive" on-tap="currentLocation()" ng-show="mode === 'hunt' || selectedID === null">
+          Current Location
+        </button>
       </div>
 
-
       <!-- map -->
-      <div id="map" data-tap-disabled="true" on-hold="createMarker(mousePosition)"></div>
+      <div id="map" data-tap-disabled="true" on-tap="createWaypoint()"></div>
 
     </ion-content>
 </ion-view>
