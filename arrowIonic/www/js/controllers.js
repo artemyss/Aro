@@ -1,17 +1,5 @@
 angular.module('app')
-.controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation) {
-
-  // Get geolocation of user's current position and initialize map
-  $cordovaGeolocation.getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
-    .then(function(currentPosition) {
-
-      $rootScope.currentPosition = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
-      $scope.geocoder = new google.maps.Geocoder();
-      initializeMap($rootScope.currentPosition);
-
-    }, function(error) {
-      console.log("Could not get current location");
-    }); // end cordovaGeolocation
+.controller('MapCtrl', function($scope, $cordovaGeolocation, coordinates) {
 
   var initializeMap = function(currentPosition) {
 
@@ -25,6 +13,7 @@ angular.module('app')
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
     google.maps.event.addDomListener($scope.map, 'mousedown', function(e){
+      // Reference to where user clicks that is passed into $scope.createMarker(position)
       $scope.mousePosition = e.latLng;
       if (document.getElementById('deleteMarkerButton').style.display === 'block') {
         document.getElementById('setArrowButton').style.display = 'none';
@@ -36,19 +25,33 @@ angular.module('app')
 
   }; // end initializeMap
 
-  var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
+  // Get geolocation of user's current position and initialize map
+  $cordovaGeolocation.getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
+    .then(function(currentPosition) {
+      coordinates.userLocation = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+      $scope.geocoder = new google.maps.Geocoder();
+      initializeMap(coordinates.userLocation);
 
+    }, function(error) {
+      console.log("Could not get current location");
+    }); // end cordovaGeolocation
+
+  // Callback function for button in view to re-center map to user's current location
   $scope.currentLocation = function() {
-    $scope.map.setCenter($rootScope.currentPosition);
+    $scope.map.setCenter(coordinates.userLocation);
   };
 
   var markers = [];
   var markerID = 0;
+  var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
+
+  // Callback function that will be invoked by 'on-hold' directive on #map
   $scope.createMarker = function(position) {
+    // 'position' parameter is provided by $scope.mousePosition
 
     // Save the location of where the marker is created
     // to access from the compass
-    $rootScope.markerPosition = position;
+    coordinates.markerLocation = position;
 
     var marker = new google.maps.Marker({
       map: $scope.map,
@@ -75,7 +78,9 @@ angular.module('app')
       infowindow.open($scope.map, marker);
     });
 
-    if (position === $rootScope.currentPosition) $scope.map.setCenter(position);
+    /* Not sure what this line does.
+    if (position === coordinates.userLocation) $scope.map.setCenter(position);
+    */
 
   }; // end createMarker
 
@@ -110,15 +115,6 @@ angular.module('app')
   }; // end geocodeAddress
 
 })
-
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-
 
 .controller('CompassCtrl', function($rootScope, $scope, $state, $cordovaDeviceOrientation, $cordovaGeolocation, $ionicScrollDelegate) {
 
