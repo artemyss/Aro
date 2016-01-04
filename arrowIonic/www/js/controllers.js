@@ -1,5 +1,4 @@
-angular.module('starter.controllers', [])
-
+angular.module('app')
 .controller('MapCtrl', function($rootScope, $scope, $cordovaGeolocation) {
 
   // Get geolocation of user's current position and initialize map
