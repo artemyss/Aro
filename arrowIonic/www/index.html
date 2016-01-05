@@ -19,19 +19,22 @@
     <script src="lib/ngCordova/dist/ng-cordova.js"></script>
     <script src="cordova.js"></script>
 
-    <!-- your app's js -->
-
-    <script src="js/app.js"></script>
+    <!-- TurfJS library -->
     <script src="lib/turf.min.js"></script>
-    <script src="js/controllers.js"></script>
+
+    <!-- your app's js -->
+    <script src="js/app.js"></script>
+    <script src="js/services/coordinates.service.js"></script>
+    <script src="js/map/map.controller.js"></script>
+    <script src="js/compass/compass.controller.js"></script>
   </head>
-  <body ng-app="starter">
+  <body ng-app="app">
     <!--
       The views will be rendered in the <ion-nav-view> directive below
       Templates are in the /templates folder (but you could also
       have templates inline in this html file if you'd like).
     -->
     <ion-nav-view></ion-nav-view>
-    <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="http://maps.google.com/maps/api/js?v=3.22"></script>
   </body>
 </html>
