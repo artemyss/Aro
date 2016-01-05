@@ -64,10 +64,6 @@ angular.module('app')
   $scope.createMarker = function(position) {
     position = position || coordinates.userLocation;
 
-    // Save the location of where the marker is created
-    // to access from the compass
-    coordinates.markerLocation = position;
-
     var marker = new google.maps.Marker({
       map: map,
       animation: google.maps.Animation.DROP,
@@ -75,10 +71,17 @@ angular.module('app')
       position: position
     });
 
+    marker.lat = position.lat();
+    marker.lng = position.lng();
     marker.id = markerCount++;
     markers.push(marker);
 
     marker.addListener('click', function() {
+      // Save the location of clicked marker
+      // to access from the compass
+      coordinates.markerLocation.lat = this.lat;
+      coordinates.markerLocation.lng = this.lng;
+      console.log(coordinates.markerLocation);
       $scope.markerID = this.id;
       if (document.getElementById('deleteMarkerButton').style.display === 'block') {
         document.getElementById('setArrowButton').style.display = 'none';
