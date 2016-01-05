@@ -58,7 +58,7 @@ angular.module('app')
   }; // end geocodeAddress
 
   var markers = [];
-  var markerID = 0;
+  var markerCount = 0;
   var infowindow = new google.maps.InfoWindow({ content: 'Selected' });
 
   $scope.createMarker = function(position) {
@@ -75,8 +75,7 @@ angular.module('app')
       position: position
     });
 
-    marker.id = markerID;
-    markerID++;
+    marker.id = markerCount++;
     markers.push(marker);
 
     marker.addListener('click', function() {
