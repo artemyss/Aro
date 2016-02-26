@@ -6,7 +6,7 @@ angular.module('app')
   $scope.bearing;
   $scope.rotation;
   $scope.distance;
-  $scope.heading;
+  $scope.heading = "0";
   $scope.compass;
 
   // watch for when coordinates.markerLocation changes
@@ -26,17 +26,19 @@ angular.module('app')
     enableHighAccuracy: false // may cause errors if true
   };
 
-  $cordovaGeolocation.watchPosition(locationOptions)
+  $cordovaGeolocation.watchPosition({})
     .then(
     null,
     function(err) {
       console.log(err);
     },
     function(position) {
+      // console.log("Position: ", position, " || There: ", $scope.there);
       $scope.here = turf.point([position.coords.latitude, position.coords.longitude]);
-      $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
+      // console.log(" || heading: ", $scope.heading);
       $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
       $scope.distance = Number(turf.distance($scope.here, $scope.there, 'miles')).toFixed(2);
+      // console.log("distance: ", $scope.distance, " /|\ rotation: ", $scope.rotation, " /|\ Bearing: ", $scope.bearing);
   });
 
   // see http://ngcordova.com/docs/plugins/deviceOrientation
@@ -45,9 +47,16 @@ angular.module('app')
   $scope.watch = $cordovaDeviceOrientation.watchHeading(orientationOptions).then(
     null,
     function(error) {
-      $scope.heading = error;
+      if(error === "No compass on Device") {
+        $scope.heading = 0;
+      } else {
+        console.log("Error line 51: ", JSON.stringify(error));
+        $scope.heading = error;
+      }
     },
     function(result) {
+      $scope.bearing = Math.floor(turf.bearing($scope.here, $scope.there) - $scope.heading + 90);
+      $scope.rotation = 'transform: rotate('+ $scope.bearing +'deg)';
       $scope.compass = 'transform: rotate(-'+ result.magneticHeading +'deg)';
       $scope.heading = result.magneticHeading;
       //  try result.magneticHeading?
